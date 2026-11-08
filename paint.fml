@@ -1,0 +1,163 @@
+// firmir-paint UI: the window is declared in Firml and compiled to C++ by
+// firmlc at build time. The canvas (PaintCanvas.hpp) and the save logic
+// (PaintApp.cpp) are C++ classes referenced as opaque Firml types; the
+// palette is a Repeater over a ListModel of colors.
+#include <firmir/items/Window.hpp>
+#include <firmir/items/Rectangle.hpp>
+#include <firmir/items/Text.hpp>
+#include <firmir/items/Button.hpp>
+#include <firmir/items/Row.hpp>
+#include <firmir/items/Repeater.hpp>
+#include <firmir/items/ListModel.hpp>
+#include <firmir/items/ListElement.hpp>
+#include "PaintCanvas.hpp"
+#include "PaintApp.hpp"
+
+Firmir.Gui.Window {
+    id: root
+    title: "firmir-paint"
+    width: 960
+    height: 640
+
+    PaintApp {
+        id: paintapp
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "#26282E"
+    }
+
+    // Toolbar.
+    Rectangle {
+        id: toolbar
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+        }
+        height: 44
+        color: "#17181C"
+
+        ListModel {
+            id: palette
+            ListElement { c: "#202020" }
+            ListElement { c: "#E03030" }
+            ListElement { c: "#30A040" }
+            ListElement { c: "#3060E0" }
+            ListElement { c: "#F0C020" }
+            ListElement { c: "#E8E8E8" }
+        }
+
+        Row {
+            x: 8
+            y: 6
+            spacing: 8
+            Repeater {
+                model: palette
+                Button {
+                    width: 34
+                    height: 32
+                    text: ""
+                    color: model.c
+                    onClicked: canvas.brushColor = model.c
+                }
+            }
+        }
+
+        Text {
+            x: 268
+            y: 12
+            color: "#E0E0E0"
+            text: "brush " + canvas.brushRadius
+        }
+        Button {
+            x: 340
+            y: 6
+            width: 32
+            height: 32
+            text: "-"
+            onClicked: canvas.brushRadius = canvas.brushRadius - 2
+        }
+        Button {
+            x: 376
+            y: 6
+            width: 32
+            height: 32
+            text: "+"
+            onClicked: canvas.brushRadius = canvas.brushRadius + 2
+        }
+        Button {
+            x: 424
+            y: 6
+            width: 70
+            height: 32
+            text: "clear"
+            onClicked: canvas.clear()
+        }
+        Button {
+            x: 500
+            y: 6
+            width: 70
+            height: 32
+            text: "save"
+            onClicked: paintapp.save()
+        }
+        Text {
+            x: 590
+            y: 12
+            fontSize: 13
+            color: "#90A090"
+            text: paintapp.statusText
+        }
+
+        Button {
+            id: closeButton
+            width: 32
+            height: 32
+            text: "X"
+            anchors {
+                right: parent.right
+                top: parent.top
+                rightMargin: 6
+                topMargin: 6
+            }
+            onClicked: App.close()
+        }
+        Button {
+            id: maxButton
+            width: 32
+            height: 32
+            text: "[]"
+            anchors {
+                right: closeButton.left
+                top: parent.top
+                rightMargin: 4
+                topMargin: 6
+            }
+            onClicked: App.toggleMaximized()
+        }
+        Button {
+            width: 32
+            height: 32
+            text: "_"
+            anchors {
+                right: maxButton.left
+                top: parent.top
+                rightMargin: 4
+                topMargin: 6
+            }
+            onClicked: App.showMinimized()
+        }
+    }
+
+    PaintCanvas {
+        id: canvas
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: toolbar.bottom
+            bottom: parent.bottom
+        }
+    }
+}
